@@ -2,7 +2,7 @@
 ## MANUAL
 clone to the repository
 ```bash
- git clone "https://github.com/parthivkumarnikku/terminal.git" && cd terminal
+ git clone "https://github.com/scap3sh4rk/Terminal.git" && cd Terminal/zshrc
 ```
 
 Install oh-my-zsh
