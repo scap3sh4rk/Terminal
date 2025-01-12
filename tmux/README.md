@@ -15,7 +15,7 @@
 ### Installation of `tmux` on Linux and configuring.
 clone to the repository
 ```bash
- git clone "https://github.com/parthivkumarnikku/terminal.git" && cd terminal/tmux
+ git clone "https://github.com/scap3sh4rk/Terminal.git" && cd terminal/tmux
 ```
 
 Install tmux 
