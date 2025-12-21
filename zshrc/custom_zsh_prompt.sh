@@ -16,8 +16,8 @@ source $ZSH/oh-my-zsh.sh
 autoload -U compinit
 compinit
 
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+#source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+#source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # ============================================================
 #  GLOBALS
