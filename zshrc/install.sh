@@ -1,18 +1,25 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[*] Installing Zsh (if missing)"
+ZSHRC="$HOME/.zshrc"
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+echo "[*] Ensuring Zsh is installed"
 if ! command -v zsh >/dev/null 2>&1; then
-    sudo apt update
-    sudo apt install -y zsh
+    apt update
+    apt install -y zsh
 fi
 
 echo "[*] Installing Oh My Zsh (if missing)"
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    RUNZSH=no CHSH=no sh -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+echo "[*] Ensuring ~/.zshrc exists"
+if [ ! -f "$ZSHRC" ]; then
+    touch "$ZSHRC"
+fi
 
 echo "[*] Installing Oh My Zsh plugins"
 mkdir -p "$ZSH_CUSTOM/plugins"
@@ -27,31 +34,33 @@ if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
         "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 fi
 
-echo "[*] Configuring ~/.zshrc"
-
-if ! grep -q "plugins=(git zsh-autosuggestions zsh-syntax-highlighting)" "$HOME/.zshrc"; then
-    sed -i 's/^plugins=.*/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' "$HOME/.zshrc"
+echo "[*] Configuring plugins in ~/.zshrc"
+if ! grep -q "^plugins=" "$ZSHRC"; then
+    echo "plugins=(git zsh-autosuggestions zsh-syntax-highlighting)" >> "$ZSHRC"
+else
+    sed -i 's/^plugins=.*/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' "$ZSHRC"
 fi
 
-if ! grep -q "autoload -U compinit" "$HOME/.zshrc"; then
-    cat >> "$HOME/.zshrc" << 'EOF'
+echo "[*] Ensuring completion system"
+if ! grep -q "autoload -U compinit" "$ZSHRC"; then
+    cat >> "$ZSHRC" << 'EOF'
 
 autoload -U compinit
 compinit
 EOF
 fi
 
-if ! grep -q "CUSTOM ZSH PROMPT START" "$HOME/.zshrc"; then
-    echo "[*] Appending custom prompt configuration"
-    cat >> "$HOME/.zshrc" << 'EOF'
+echo "[*] Installing custom prompt"
+if ! grep -q "CUSTOM ZSH PROMPT START" "$ZSHRC"; then
+    cat >> "$ZSHRC" << 'EOF'
 
 # ===== CUSTOM ZSH PROMPT START =====
 EOF
-    cat custom_zsh_prompt.sh >> "$HOME/.zshrc"
-    cat >> "$HOME/.zshrc" << 'EOF'
+    cat custom_zsh_prompt.sh >> "$ZSHRC"
+    cat >> "$ZSHRC" << 'EOF'
 # ===== CUSTOM ZSH PROMPT END =====
 EOF
 fi
 
-echo "[*] Installation complete"
-echo "[*] Restart the terminal or run: source ~/.zshrc"
+echo "[*] Done."
+echo "[*] To use it now: exec zsh"
