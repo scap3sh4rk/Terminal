@@ -3,7 +3,7 @@
 # ============================================================
 
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="robbyrussell"
+ZSH_THEME="scap3sh4rk"
 
 plugins=(
   git
@@ -24,7 +24,6 @@ elapsed_display=""
 exit_display=""
 ssh_display=""
 tmux_display=""
-danger_prefix=""
 last_exit=0
 timer_start=""
 
@@ -80,15 +79,17 @@ precmd() {
         ssh_display=""
     fi
 
-    # TMUX indicator (session:pane)
+    # TMUX indicator (session:window:pane)
     if [[ -n "$TMUX" ]]; then
-        local tmux_info session pane
-        tmux_info=$(tmux display-message -p '#S:#P' 2>/dev/null)
+        local tmux_info session window pane
+        tmux_info=$(tmux display-message -p '#S:#I:#P' 2>/dev/null)
         if [[ -n "$tmux_info" ]]; then
             session="${tmux_info%%:*}"
+            window="${tmux_info#*:}"
+            window="${window%%:*}"
             pane="${tmux_info##*:}"
-            session="${session:0:3}"
-            tmux_display="%F{magenta}${session}:${pane}%f"
+            session="${session:0:4}"
+            tmux_display="%F{magenta}${session}:${window}:${pane}%f"
         else
             tmux_display=""
         fi
