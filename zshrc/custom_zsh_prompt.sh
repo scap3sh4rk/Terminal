@@ -11,7 +11,7 @@ plugins=(
   zsh-syntax-highlighting
 )
 
-source $ZSH/oh-my-zsh.sh
+source "$ZSH/oh-my-zsh.sh"
 
 autoload -U compinit
 compinit
@@ -21,9 +21,15 @@ compinit
 # ============================================================
 
 elapsed_display=""
+exit_display=""
+ssh_display=""
+tmux_display=""
+danger_prefix=""
+last_exit=0
+timer_start=""
 
 # ============================================================
-#  TIMER LOGIC (ROUNDED + COLORED)
+#  TIMER + STATUS LOGIC
 # ============================================================
 
 preexec() {
@@ -31,20 +37,29 @@ preexec() {
 }
 
 precmd() {
+    last_exit=$?
     print ""
 
-    if [[ -n "$timer_start" ]]; then
-        local now=$EPOCHREALTIME
-        local elapsed_sec=$(( now - timer_start ))
-        local elapsed_ms=$(( elapsed_sec * 1000 ))
+    # Exit code
+    if (( last_exit != 0 )); then
+        exit_display="%F{red}✗ ${last_exit}%f"
+    else
+        exit_display=""
+    fi
 
-        # Choose color based on time
+    # Execution time
+    if [[ -n "$timer_start" ]]; then
+        local now elapsed_sec elapsed_ms COLOR
+        now=$EPOCHREALTIME
+        elapsed_sec=$(( now - timer_start ))
+        elapsed_ms=$(( elapsed_sec * 1000 ))
+
         if (( elapsed_ms < 500 )); then
-            local COLOR="%F{green}"
+            COLOR="%F{green}"
         elif (( elapsed_ms < 2000 )); then
-            local COLOR="%F{yellow}"
+            COLOR="%F{yellow}"
         else
-            local COLOR="%F{red}"
+            COLOR="%F{red}"
         fi
 
         if (( elapsed_ms >= 1000 )); then
@@ -53,9 +68,32 @@ precmd() {
             elapsed_display="${COLOR}$(printf "%.1f ms" "$elapsed_ms")%f"
         fi
 
-        unset timer_start
+        timer_start=""
     else
         elapsed_display=""
+    fi
+
+    # SSH indicator
+    if [[ -n "$SSH_CONNECTION" ]]; then
+        ssh_display="%F{cyan}⛓ hop:1%f"
+    else
+        ssh_display=""
+    fi
+
+    # TMUX indicator (session:pane)
+    if [[ -n "$TMUX" ]]; then
+        local tmux_info session pane
+        tmux_info=$(tmux display-message -p '#S:#P' 2>/dev/null)
+        if [[ -n "$tmux_info" ]]; then
+            session="${tmux_info%%:*}"
+            pane="${tmux_info##*:}"
+            session="${session:0:3}"
+            tmux_display="%F{magenta}${session}:${pane}%f"
+        else
+            tmux_display=""
+        fi
+    else
+        tmux_display=""
     fi
 
     set_prompt
@@ -72,22 +110,19 @@ set_prompt() {
     local COLOR_CYAN="%F{cyan}"
     local COLOR_RESET="%f"
 
-    local ip_address=$(hostname -I | awk '{print $1}')
-    local user_host="${USER}@${HOST}"
-    local dir=$(pwd)
-    local hacker=$(printf '\uf21b')
+    local ip_address user_host dir
+    ip_address=$(hostname -I | awk '{print $1}')
+    user_host="${USER}@${HOST}"
+    dir="${PWD}"
 
-    PROMPT="┌──${COLOR_YELLOW}${hacker} ${COLOR_RESET}${COLOR_GREEN}${user_host} ${COLOR_BLUE}on ${COLOR_YELLOW}[${ip_address}]${COLOR_RESET}
-├──${COLOR_GREEN} ${COLOR_BLUE}${dir}${COLOR_RESET}
-└──${COLOR_YELLOW} ${COLOR_RESET} "
+    PROMPT=$'┌──'"${COLOR_YELLOW} ${COLOR_RESET}${COLOR_GREEN}${user_host} ${COLOR_BLUE}on ${COLOR_YELLOW}[${ip_address}]${COLOR_RESET}"$'\n'"├──${COLOR_GREEN} ${COLOR_BLUE}${dir}${COLOR_RESET}"$'\n'"└──${COLOR_YELLOW}${COLOR_BLUE}  ${COLOR_RESET}"
 
-    RPROMPT="[ ⚡ ${elapsed_display} ] ${COLOR_CYAN}[ %D{%I:%M %p} ]${COLOR_RESET}"
+    RPROMPT="${exit_display:+$exit_display  }⚡ ${elapsed_display}${tmux_display:+  $tmux_display}${ssh_display:+  $ssh_display}  ${COLOR_CYAN}%D{%I:%M %p}${COLOR_RESET}"
 }
 
 # Initial prompt
 set_prompt
 
-# Update prompt on directory change
 chpwd() {
     set_prompt
 }
@@ -96,4 +131,4 @@ chpwd() {
 #  MY SETTINGS
 # ============================================================
 
-export IP=$(hostname -I | awk '{print $1}')
+export IP="$(hostname -I | awk '{print $1}')"
