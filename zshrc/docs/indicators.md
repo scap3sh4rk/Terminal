@@ -1,4 +1,7 @@
-# Status Codes and Their Meaning 
+## Additional Informantion
+By default the icons used are not available in linux, so the parser will not understand the icons and falls back to the default icon. Visit nerd fonts and installing some fonts such as `commitmono`, etc will get this resolved.
+
+## Status Codes and Their Meaning 
 
 |      Code | Meaning                                |
 | --------: | -------------------------------------- |
