@@ -121,7 +121,7 @@ set_prompt() {
     user_host="${USER}@${HOST}"
     dir="${PWD}"
 
-    PROMPT=$'┌──'"${COLOR_YELLOW} ${COLOR_RESET}${COLOR_GREEN}${user_host} ${COLOR_BLUE}on ${COLOR_YELLOW}[${ip_address}]${COLOR_RESET}"$'\n'"├──${COLOR_GREEN} ${COLOR_BLUE}${dir}${COLOR_RESET}"$'\n'"└──${COLOR_YELLOW}${COLOR_BLUE}  ${COLOR_RESET}"
+    PROMPT=$'┌──'"${COLOR_YELLOW} ${COLOR_RESET}${COLOR_GREEN}${user_host} ${COLOR_BLUE}on ${COLOR_YELLOW}[${ip_address}]${COLOR_RESET}"$'\n'"├──${COLOR_BLUE} ${COLOR_BLUE}${dir}${COLOR_RESET}"$'\n'"└──${COLOR_BLUE}$ ${COLOR_YELLOW}${COLOR_RESET}"
 
     RPROMPT="${exit_display:+$exit_display  }⚡ ${elapsed_display}${tmux_display:+  $tmux_display}${ssh_display:+  $ssh_display}  ${COLOR_CYAN}%D{%I:%M %p}${COLOR_RESET}"
 }
